@@ -1,0 +1,20 @@
+<html>
+{% include "header.html" %}
+<body>
+<div class="container">
+	<h1>Add new item</h1>
+
+		<form action="{{ url_for('newItem') }}" method = 'post'>
+			<div class="form-group">
+				<input class="form-control mt-2" type='text' size='30' name='name' placeholder='Name' required>
+				<input class="form-control mt-2" type='text' size='30' name='link' placeholder='Link URL' required>
+				<input class="form-control mt-2" type='text' size='30' name='description' placeholder='Description' required>
+				<input class="form-control mt-2" type='text' size='30' name='image' placeholder='Image URL' required>
+				<button type="submit" class="btn btn-outline-success btn-sm mt-2">Add Item</button>
+			</div>
+		</form>
+
+		<a class="btn btn-outline-secondary btn-sm" href="{{ url_for('showItems') }}" role="button">Cancel</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<html>
+{% include "header.html" %}
+<body>
+<div class="container">
+	<h1>{{item.item_name}}</h1>
+
+		<form action="{{ url_for('editItem', item_id = item.id, item = item) }}" method = 'post'>
+			<div class="form-group">
+				<input class="form-control mt-2" type='text' size='30' name='name' value='{{ item.item_name }}'>
+				<input class="form-control mt-2" type='text' size='30' name='link' value='{{ item.item_link }}'>
+				<input class="form-control mt-2" type='text' size='30' name='description' value='{{ item.item_description }}'>
+				<input class="form-control mt-2" type='text' size='30' name='image' value='{{ item.item_image }}'>
+				<button type="submit" class="btn btn-outline-success btn-sm mt-2">Update</button>
+			</div>
+		</form>
+	
+	<a class="btn btn-outline-secondary btn-sm" href="{{ url_for('showItems') }}" role="button">Cancel</a>
+
+</div>
+
+</body>
+
+</html>

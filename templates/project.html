@@ -1,0 +1,60 @@
+<html>
+{% include "header.html" %}
+<body>
+
+	<div class="container">
+		<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+			<div class="navbar-collapse collapse justify-content-stretch">
+				<h1 class="navbar-brand">Udacity Project</h1>
+				<ul class="navbar-nav ml-auto">
+					<li class="nav-item">
+						{% if not login_session['username'] %}
+						<a class="btn btn-outline-success btn-sm" href = "{{url_for('showLogin')}}" role="button">Login</a>
+						{% else %}
+						<a class="btn btn-outline-danger btn-sm" href = "{{url_for('gdisconnect')}}" role="button">Logout</a>
+						{% endif %}
+					</li>
+				</ul>
+			</div>
+		</nav>
+		<div class="row mt-5">
+			<div class="col-12 text-center">
+				<h1 class="display-4">Item catalog</h1>
+				<p class="lead">This is page is created for showcasing CRUD operations and authentications</p>
+			</div>
+		</div>
+		{% if login_session['username'] %}
+		<div class="row mb-2">
+			<div class="col-12">
+				<a class="btn btn-outline-success btn-sm" href = "{{url_for('newItem')}}" role="button">Create new Item</a>
+			</div>
+		</div>
+		{% endif %}
+		<div class="row">
+			{% for i in items %}
+			<div class="col-sm-4 d-flex">
+				<div class="card mt-1 mb-1">
+					{% if login_session['username'] %}
+					<div class="card-header">
+						<a class="btn btn-outline-info btn-sm" href="{{url_for('editItem', item_id = i.id)}}" role="button">Edit</a>
+						<a class="btn btn-outline-info btn-sm" href="{{url_for('deleteItem', item_id = i.id)}}" role="button">Delete</a>
+					</div>
+					{% endif %}
+					<a href="{{i.item_link}}">
+						<img class="card-img-top" src="{{i.item_image}}" alt="{{i.item_image}}">
+					</a>
+					<div class="card-body">
+						<h5 class="card-title">{{i.item_name}}</h5>
+						<p class="card-text">{{i.item_description}}</p>
+					</div>
+				</div>
+			</div>
+		{% endfor %}
+		</div>
+	<footer class="border-top mt-5">
+		<p class="lead small text-center mt-3">Very cool footer</p>
+	</footer>
+	</div>
+	
+</body>
+</html>
