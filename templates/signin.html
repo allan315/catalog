@@ -1,32 +1,23 @@
-<!DOCTYPE html>
 <html>
-<head>
+{% include "header.html" %}
+<body> 
 
-	<!--LOAD PRE-REQUISITES FOR GOOGLE SIGN IN -->
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-	<script src="//apis.google.com/js/platform.js?onload=start"> </script>
-
-</head>
-
-
-<body>  
-
-
+<div class="container">
 <!-- GOOGLE PLUS SIGN IN-->
-
-          
-          <div id="signinButton">
-          <span class="g-signin"
-            data-scope="openid email"
-            data-clientid="462350162402-lnivqgj5echv7q244bugqnh5ep57j5qf.apps.googleusercontent.com"
-            data-redirecturi="postmessage"
-            data-accesstype="offline"
-            data-cookiepolicy="single_host_origin"
-            data-callback="signInCallback"
-            data-approvalprompt="force">
-          </span>
-        </div>
-
+	<h2>Click to login with your Google account:</h2>
+	<div id="signinButton">
+		<span class="g-signin"
+			data-scope="openid email"
+			data-clientid="462350162402-lnivqgj5echv7q244bugqnh5ep57j5qf.apps.googleusercontent.com"
+			data-redirecturi="postmessage"
+			data-accesstype="offline"
+			data-cookiepolicy="single_host_origin"
+			data-callback="signInCallback"
+			data-approvalprompt="force">
+		</span>
+	</div>
+	
+</div>
 <div id="result"></div>
 
 <script>
@@ -34,6 +25,7 @@ function signInCallback(authResult) {
   if (authResult['code']) {
     // Hide the sign-in button now that the user is authorized
     $('#signinButton').attr('style', 'display: none');
+	$('h2').attr('style', 'display: none');
     // Send the one-time-use code to the server, if the server responds, write a 'login successful' message to the web page and then redirect back to the main restaurants page
     $.ajax({
       type: 'POST',
@@ -44,10 +36,10 @@ function signInCallback(authResult) {
       success: function(result) {
         // Handle or verify the server response if necessary.
         if (result) {
-          $('#result').html('Login Successful!</br>'+ result + '</br>Redirecting...')
+          $('#result').html('Login Successful!</br>')
          setTimeout(function() {
           window.location.href = "/items";
-         }, 4000);
+         }, 2000);
           
       } else if (authResult['error']) {
     console.log('There was an error: ' + authResult['error']);
@@ -59,10 +51,7 @@ function signInCallback(authResult) {
   }); } }
 </script>
 
-
-
 <!-- END GOOGLE PLUS SIGN IN -->
 
-  </body>
-
-  </html>
+</body>
+</html>

@@ -6,6 +6,7 @@ from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 from flask import session as login_session
 from flask import make_response
+from functools import wraps
 import httplib2
 import json
 import random
@@ -24,6 +25,15 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+# Redirect to login page if not logged in
+def login_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if 'username' in login_session:
+            return func(*args, **kwargs)
+        else:
+            return redirect(url_for('showLogin'))
+    return wrapper
 
 # Create anti-forgery state token
 @app.route('/login')
@@ -107,12 +117,13 @@ def gconnect():
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
-    return redirect(url_for('showItems'))
+    return "Redirecting.."
 
     # DISCONNECT - Revoke a current user's token and reset their login_session
 
 
 @app.route('/gdisconnect')
+@login_required
 def gdisconnect():
     access_token = login_session['access_token']
     print 'In gdisconnect access token is %s', access_token
@@ -157,6 +168,7 @@ def showItems():
 
 # Add new items
 @app.route('/items/new/', methods=['GET', 'POST'])
+@login_required
 def newItem():
     if request.method == 'POST':
         newItem = Items(item_name=request.form.get('name'),
@@ -172,6 +184,7 @@ def newItem():
 
 # Edit items
 @app.route('/items/<int:item_id>/edit/', methods=['GET', 'POST'])
+@login_required
 def editItem(item_id):
     item = session.query(Items).filter_by(id=item_id).one()
     if request.method == 'POST':
@@ -188,6 +201,7 @@ def editItem(item_id):
 
 # Delete items
 @app.route('/items/<int:item_id>/delete/', methods=['GET', 'POST'])
+@login_required
 def deleteItem(item_id):
     item = session.query(Items).filter_by(id=item_id).one()
     if request.method == 'POST':
