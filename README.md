@@ -32,3 +32,7 @@ https://www.virtualbox.org/wiki/Downloads
 9. Open http://localhost:8000 with your webbrowser to open the item catalog
 
 10. Login using your Google account to create, edit or delete items
+
+### Json endpoint
+
+http://localhost:8000/items/JSON
