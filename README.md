@@ -15,11 +15,11 @@ https://www.virtualbox.org/wiki/Downloads
 
 2. Clone or download the fullstack-nanodegree-vm repository (https://github.com/udacity/fullstack-nanodegree-vm)
 
-3. Launch the Vagrant VM (by typing `vagrant up` in the directory fullstack/vagrant from the terminal)
+3. Launch the Vagrant VM by typing `vagrant up` in the directory fullstack/vagrant from the terminal
 
-4. `cd` to /vagrant directory and run command `vagrant up` to install the VM.
+4. `cd` to `/vagrant` directory and run command `vagrant up` to install the VM.
 
-5. Clone or download the catalog app and place it in the /catalog folder
+5. Clone or download the catalog app and place it in the `/catalog` folder
 
 6. You need to have a Google account to login
 
