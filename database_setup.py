@@ -29,4 +29,3 @@ class Items(Base):
 
 engine = create_engine('sqlite:///items.db')
 Base.metadata.create_all(engine)
-

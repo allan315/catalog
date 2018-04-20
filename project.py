@@ -25,6 +25,7 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+
 # Redirect to login page if not logged in
 def login_required(func):
     @wraps(func)
@@ -34,6 +35,7 @@ def login_required(func):
         else:
             return redirect(url_for('showLogin'))
     return wrapper
+
 
 # Create anti-forgery state token
 @app.route('/login')
@@ -135,8 +137,8 @@ def gdisconnect():
             'Current user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' \
-    % login_session['access_token']
+    url = ('https://accounts.google.com/o/oauth2/revoke?token=%s'
+           % login_session['access_token'])
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     print 'result is '
@@ -221,4 +223,4 @@ def itemsJSON():
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='0.0.0.0', port=8005)
