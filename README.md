@@ -40,7 +40,7 @@ http://localhost:8005/items/JSON
 
 
 Specific item
-http://localhost:8005/items/<id>/JSON
+http://localhost:8005/items/<id\>/JSON
 
 
 (e.g. http://localhost:8005/items/1/JSON)
