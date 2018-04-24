@@ -29,10 +29,19 @@ https://www.virtualbox.org/wiki/Downloads
 
 8. `cd` to `/vagrant/catalog/` and type `pyhton project.py` to run the app
 
-9. Open http://localhost:8000 with your webbrowser to open the item catalog
+9. Open http://localhost:8005 with your webbrowser to open the item catalog
 
 10. Login using your Google account to create, edit or delete items
 
-### Json endpoint
+### Json endpoints
 
-http://localhost:8000/items/JSON
+All items
+http://localhost:8005/items/JSON
+
+
+Specific item
+http://localhost:8005/items/<id>/JSON
+
+
+(e.g. http://localhost:8005/items/1/JSON)
+
