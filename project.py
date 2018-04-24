@@ -49,6 +49,10 @@ def showLogin():
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    """
+    Gathers data from Google Sign In API and places it
+    inside a session variable.
+    """
     # Validate state token
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
@@ -133,6 +137,9 @@ def gconnect():
 @app.route('/gdisconnect')
 @login_required
 def gdisconnect():
+    """
+    Deletes the login session and revokes the login token
+    """
     access_token = login_session['access_token']
     print 'In gdisconnect access token is %s', access_token
     print 'User name is: '
@@ -168,11 +175,12 @@ def gdisconnect():
 
 
 def createUser(login_session):
-    newUser = User(user_name=login_session['username'], user_email=login_session[
-                   'email'])
+    newUser = User(user_name=login_session['username'],
+                   user_email=login_session['email'])
     session.add(newUser)
     session.commit()
-    user = session.query(User).filter_by(user_email=login_session['email']).one()
+    user = session.query(User).filter_by(
+        user_email=login_session['email']).one()
     return user.id
 
 
@@ -189,7 +197,7 @@ def getUserID(email):
         return None
 
 
-# Categories
+# Shows all categories
 @app.route('/cat/')
 @login_required
 def showCats():
@@ -197,13 +205,13 @@ def showCats():
     return render_template('showCat.html', cats=cats)
 
 
-# Add new category
+# Adds new category
 @app.route('/cat/new/', methods=['GET', 'POST'])
 @login_required
 def newCat():
     if request.method == 'POST':
         cat = Categories(cat_name=request.form.get('name'),
-                        user_id=login_session['user_id'])
+                         user_id=login_session['user_id'])
         session.add(cat)
         session.commit()
         return redirect(url_for('showItems'))
@@ -211,7 +219,7 @@ def newCat():
         return render_template('newCat.html')
 
 
-# Add delete category
+# Add delete a category
 @app.route('/cat/<int:cat_id>/delete/', methods=['GET', 'POST'])
 @login_required
 def deleteCat(cat_id):
@@ -226,7 +234,7 @@ def deleteCat(cat_id):
     return "Not authorized to modify this item!"
 
 
-# Add edit category
+# Add edit a category
 @app.route('/cat/<int:cat_id>/edit/', methods=['GET', 'POST'])
 @login_required
 def editCat(cat_id):
@@ -241,10 +249,14 @@ def editCat(cat_id):
             return render_template('editCat.html', cat_id=cat_id, cat=cat)
     return "Not authorized to modify this item!"
 
+
 # Show my items
 @app.route('/')
 @app.route('/items/')
 def showItems():
+    """
+    This is for showing the main page of webapp with all items
+    """
     items = session.query(Items).all()
     cats = session.query(Categories).all()
     return render_template(
@@ -260,7 +272,8 @@ def newItem():
                         item_link=request.form.get('link'),
                         item_description=request.form.get('description'),
                         item_image=request.form.get('image'),
-                        item_category_id=session.query(Categories).filter_by(cat_name=request.form.get('category')).one().id,
+                        item_category_id=session.query(Categories).filter_by(
+                            cat_name=request.form.get('category')).one().id,
                         user_id=login_session['user_id'])
         session.add(newItem)
         session.commit()
@@ -282,13 +295,16 @@ def editItem(item_id):
             item.item_link = request.form.get('link', None)
             item.item_description = request.form.get('description', None)
             item.item_image = request.form.get('image', None)
-            item.item_category_id = session.query(Categories).filter_by(cat_name=request.form.get('category', None)).one().id
+            item.item_category_id = session.query(Categories).filter_by(
+                cat_name=request.form.get('category', None)).one().id
             session.add(item)
             session.commit()
             return redirect(url_for('showItems'))
         else:
-            return render_template('editItem.html', item_id=item_id, item=item, cat=cat)
+            return render_template('editItem.html', item_id=item_id,
+                                   item=item, cat=cat)
     return "Not authorized to modify this item!"
+
 
 # Delete items
 @app.route('/items/<int:item_id>/delete/', methods=['GET', 'POST'])
@@ -304,16 +320,20 @@ def deleteItem(item_id):
             return render_template('deleteItem.html', item=item)
     return "Not authorized to modify this item!"
 
-# JSON API
+
+# JSON endpoint for all items
 @app.route('/items/JSON')
 def itemsJSON():
     items = session.query(Items).all()
     return jsonify(Items=[i.serialize for i in items])
 
+
+# JSON endpoint for specific item
 @app.route('/items/<int:item_id>/JSON')
 def specificItemJSON(item_id):
     item = session.query(Items).filter_by(id=item_id).one()
     return jsonify(item.serialize)
+
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
