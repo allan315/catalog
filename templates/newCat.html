@@ -1,0 +1,19 @@
+<html>
+{% include "header.html" %}
+<body>
+<div class="container">
+	
+	<h1>Add new Category</h1>
+
+		<form action="{{ url_for('newCat') }}" method = 'post'>
+			<div class="form-group">
+				<input class="form-control mt-2" type='text' size='30' name='name' placeholder='Name' required>
+				<button type="submit" class="btn btn-outline-success btn-sm mt-2">Add Item</button>
+			</div>
+		</form>
+
+		<a class="btn btn-outline-secondary btn-sm" href="{{ url_for('showItems') }}" role="button">Cancel</a>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<html>
+{% include "header.html" %}
+<body>
+	<div class="container">
+		<h1> Are you sure you want to delete "{{cat.cat_name}}"? </h1>
+		<form action="{{ url_for('deleteCat', cat_id = cat.id )}}" method = 'post'>
+			<button type="submit" class="btn btn-outline-danger mt-2 btn-sm">Delete</button>
+		</form>
+		<a class="btn btn-outline-secondary btn-sm" href="{{ url_for('showItems') }}" role="button">Cancel</a>
+	</div>
+</body>
+
+</html>

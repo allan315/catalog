@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, jsonify, url_for, flash  # NOQA
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, Items
+from database_setup import Base, Items, User, Categories
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 from flask import session as login_session
@@ -116,8 +116,14 @@ def gconnect():
     data = answer.json()
 
     login_session['username'] = data['name']
-    login_session['picture'] = data['picture']
     login_session['email'] = data['email']
+
+    # See if a user exists, if it doesn't make a new one
+
+    user_id = getUserID(login_session['email'])
+    if not user_id:
+        user_id = createUser(login_session)
+    login_session['user_id'] = user_id
 
     return "Redirecting.."
 
@@ -148,7 +154,6 @@ def gdisconnect():
         del login_session['gplus_id']
         del login_session['username']
         del login_session['email']
-        del login_session['picture']
         response = make_response(json.dumps('Successfully disconnected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return redirect(url_for('showItems'))
@@ -159,13 +164,91 @@ def gdisconnect():
         return response
 
 
+# User Helper Functions
+
+
+def createUser(login_session):
+    newUser = User(user_name=login_session['username'], user_email=login_session[
+                   'email'])
+    session.add(newUser)
+    session.commit()
+    user = session.query(User).filter_by(user_email=login_session['email']).one()
+    return user.id
+
+
+def getUserInfo(user_id):
+    user = session.query(User).filter_by(id=user_id).one()
+    return user
+
+
+def getUserID(email):
+    try:
+        user = session.query(User).filter_by(user_email=email).one()
+        return user.id
+    except:
+        return None
+
+
+# Categories
+@app.route('/cat/')
+@login_required
+def showCats():
+    cats = session.query(Categories).all()
+    return render_template('showCat.html', cats=cats)
+
+
+# Add new category
+@app.route('/cat/new/', methods=['GET', 'POST'])
+@login_required
+def newCat():
+    if request.method == 'POST':
+        cat = Categories(cat_name=request.form.get('name'),
+                        user_id=login_session['user_id'])
+        session.add(cat)
+        session.commit()
+        return redirect(url_for('showItems'))
+    else:
+        return render_template('newCat.html')
+
+
+# Add delete category
+@app.route('/cat/<int:cat_id>/delete/', methods=['GET', 'POST'])
+@login_required
+def deleteCat(cat_id):
+    cat = session.query(Categories).filter_by(id=cat_id).one()
+    if cat.user_id == login_session['user_id']:
+        if request.method == 'POST':
+            session.delete(cat)
+            session.commit()
+            return redirect(url_for('showItems'))
+        else:
+            return render_template('deleteCat.html', cat_id=cat_id, cat=cat)
+    return "Not authorized to modify this item!"
+
+
+# Add edit category
+@app.route('/cat/<int:cat_id>/edit/', methods=['GET', 'POST'])
+@login_required
+def editCat(cat_id):
+    cat = session.query(Categories).filter_by(id=cat_id).one()
+    if cat.user_id == login_session['user_id']:
+        if request.method == 'POST':
+            cat.cat_name = request.form.get('name', None)
+            session.add(cat)
+            session.commit()
+            return redirect(url_for('showItems'))
+        else:
+            return render_template('editCat.html', cat_id=cat_id, cat=cat)
+    return "Not authorized to modify this item!"
+
 # Show my items
 @app.route('/')
 @app.route('/items/')
 def showItems():
     items = session.query(Items).all()
+    cats = session.query(Categories).all()
     return render_template(
-        'project.html', items=items, login_session=login_session)
+        'project.html', items=items, login_session=login_session, cats=cats)
 
 
 # Add new items
@@ -176,12 +259,15 @@ def newItem():
         newItem = Items(item_name=request.form.get('name'),
                         item_link=request.form.get('link'),
                         item_description=request.form.get('description'),
-                        item_image=request.form.get('image'))
+                        item_image=request.form.get('image'),
+                        item_category_id=session.query(Categories).filter_by(cat_name=request.form.get('category')).one().id,
+                        user_id=login_session['user_id'])
         session.add(newItem)
         session.commit()
         return redirect(url_for('showItems'))
     else:
-        return render_template('newItem.html')
+        cat = session.query(Categories).all()
+        return render_template('newItem.html', cat=cat)
 
 
 # Edit items
@@ -189,30 +275,34 @@ def newItem():
 @login_required
 def editItem(item_id):
     item = session.query(Items).filter_by(id=item_id).one()
-    if request.method == 'POST':
-        item.item_name = request.form.get('name', None)
-        item.item_link = request.form.get('link', None)
-        item.item_description = request.form.get('description', None)
-        item.item_image = request.form.get('image', None)
-        session.add(item)
-        session.commit()
-        return redirect(url_for('showItems'))
-    else:
-        return render_template('editItem.html', item_id=item_id, item=item)
-
+    cat = session.query(Categories).all()
+    if item.user_id == login_session['user_id']:
+        if request.method == 'POST':
+            item.item_name = request.form.get('name', None)
+            item.item_link = request.form.get('link', None)
+            item.item_description = request.form.get('description', None)
+            item.item_image = request.form.get('image', None)
+            item.item_category_id = session.query(Categories).filter_by(cat_name=request.form.get('category', None)).one().id
+            session.add(item)
+            session.commit()
+            return redirect(url_for('showItems'))
+        else:
+            return render_template('editItem.html', item_id=item_id, item=item, cat=cat)
+    return "Not authorized to modify this item!"
 
 # Delete items
 @app.route('/items/<int:item_id>/delete/', methods=['GET', 'POST'])
 @login_required
 def deleteItem(item_id):
     item = session.query(Items).filter_by(id=item_id).one()
-    if request.method == 'POST':
-        session.delete(item)
-        session.commit()
-        return redirect(url_for('showItems'))
-    else:
-        return render_template('deleteItem.html', item=item)
-
+    if item.user_id == login_session['user_id']:
+        if request.method == 'POST':
+            session.delete(item)
+            session.commit()
+            return redirect(url_for('showItems'))
+        else:
+            return render_template('deleteItem.html', item=item)
+    return "Not authorized to modify this item!"
 
 # JSON API
 @app.route('/items/JSON')
@@ -220,7 +310,12 @@ def itemsJSON():
     items = session.query(Items).all()
     return jsonify(Items=[i.serialize for i in items])
 
+@app.route('/items/<int:item_id>/JSON')
+def specificItemJSON(item_id):
+    item = session.query(Items).filter_by(id=item_id).one()
+    return jsonify(item.serialize)
+
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='0.0.0.0', port=8005)

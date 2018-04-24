@@ -1,0 +1,21 @@
+<html>
+{% include "header.html" %}
+<body>
+<div class="container">
+	<h1>Create and Edit Categories</h1>
+	<a class="btn btn-outline-success btn-lg" href = "{{url_for('newCat')}}" role="button">Create new Category</a>
+	<div class="row mb-2">
+		<div class="col-4">
+			<ul class="list-group">
+			{% for i in cats %}
+				<li class="list-group-item mb-2 mt-2">{{i.cat_name}}</li>
+				<a class="btn btn-outline-info btn-sm" href="{{url_for('editCat', cat_id = i.id)}}" role="button">Edit</a>
+				<a class="btn btn-outline-info btn-sm" href="{{url_for('deleteCat', cat_id = i.id)}}" role="button">Delete</a>
+			{% endfor %}
+			</ul>
+			<a class="btn btn-outline-secondary btn-sm mt-2" href="{{ url_for('showItems') }}" role="button">Cancel</a>
+		</div>
+	</div>
+</div>
+</body>
+</html>

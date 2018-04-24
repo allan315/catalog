@@ -11,6 +11,7 @@
 						{% if not login_session['username'] %}
 						<a class="btn btn-outline-success btn-sm" href = "{{url_for('showLogin')}}" role="button">Login</a>
 						{% else %}
+						<span class="mr-2">Hello {{login_session['username']}}!</span>
 						<a class="btn btn-outline-danger btn-sm" href = "{{url_for('gdisconnect')}}" role="button">Logout</a>
 						{% endif %}
 					</li>
@@ -20,37 +21,84 @@
 		<div class="row mt-5">
 			<div class="col-12 text-center">
 				<h1 class="display-4">Item catalog</h1>
-				<p class="lead">This is page is created for showcasing CRUD operations and authentications</p>
+				<p class="lead">This is page is created for showcasing CRUD operations and authentication/authorization</p>
 			</div>
 		</div>
 		{% if login_session['username'] %}
 		<div class="row mb-2">
-			<div class="col-12">
-				<a class="btn btn-outline-success btn-sm" href = "{{url_for('newItem')}}" role="button">Create new Item</a>
+			<div class="col-12 text-center">
+				<a class="btn btn-outline-success btn-lg" href = "{{url_for('showCats')}}" role="button">Edit Categories</a>
+				<a class="btn btn-outline-success btn-lg" href = "{{url_for('newItem')}}" role="button">Create new Item</a>
 			</div>
 		</div>
 		{% endif %}
-		<div class="row">
-			{% for i in items %}
-			<div class="col-sm-4 d-flex">
-				<div class="card mt-1 mb-1">
-					{% if login_session['username'] %}
-					<div class="card-header">
-						<a class="btn btn-outline-info btn-sm" href="{{url_for('editItem', item_id = i.id)}}" role="button">Edit</a>
-						<a class="btn btn-outline-info btn-sm" href="{{url_for('deleteItem', item_id = i.id)}}" role="button">Delete</a>
+		
+		<ul class="nav nav-tabs" id="myTab" role="tablist">
+			<li class="nav-item">
+				<a class="nav-link active" id="All-tab" data-toggle="tab" href="#All" role="tab" aria-controls="All" aria-selected="true">All</a>
+			</li>
+			{% for c in cats %}
+			<li class="nav-item">
+				<a class="nav-link" id="{{c.cat_name}}-tab" data-toggle="tab" href="#{{c.cat_name}}" role="tab" aria-controls="{{c.cat_name}}" aria-selected="false">{{c.cat_name}}</a>
+			</li>
+			{% endfor %}
+		</ul>
+			
+		<div class="tab-content" id="myTabContent">
+			<div class="tab-pane fade show active" id="All" role="tabpanel" aria-labelledby="All-tab">
+				<div class="row">
+					{% for i in items %}
+					<div class="col-sm-4 d-flex">
+						<div class="card mt-1 mb-1">
+							{% if login_session['username'] %}
+							<div class="card-header">
+								<a class="btn btn-outline-info btn-sm" href="{{url_for('editItem', item_id = i.id)}}" role="button">Edit</a>
+								<a class="btn btn-outline-info btn-sm" href="{{url_for('deleteItem', item_id = i.id)}}" role="button">Delete</a>
+							</div>
+							{% endif %}
+							<a href="{{i.item_link}}">
+								<img class="card-img-top" src="{{i.item_image}}" alt="{{i.item_image}}">
+							</a>
+							<div class="card-body">
+								<h5 class="card-title">{{i.item_name}}</h5>
+								<p class="card-text">{{i.item_description}}</p>
+							</div>
+						</div>
 					</div>
-					{% endif %}
-					<a href="{{i.item_link}}">
-						<img class="card-img-top" src="{{i.item_image}}" alt="{{i.item_image}}">
-					</a>
-					<div class="card-body">
-						<h5 class="card-title">{{i.item_name}}</h5>
-						<p class="card-text">{{i.item_description}}</p>
-					</div>
+					{% endfor %}
 				</div>
 			</div>
-		{% endfor %}
+			
+			{% for c in cats %}
+			<div class="tab-pane fade" id="{{c.cat_name}}" role="tabpanel" aria-labelledby="{{c.cat_name}}-tab">
+				<div class="row">
+					{% for i in items %}
+					{% if i.item_category_id == c.id %}
+					<div class="col-sm-4 d-flex">
+						<div class="card mt-1 mb-1">
+							{% if login_session['username'] %}
+							<div class="card-header">
+								<a class="btn btn-outline-info btn-sm" href="{{url_for('editItem', item_id = i.id)}}" role="button">Edit</a>
+								<a class="btn btn-outline-info btn-sm" href="{{url_for('deleteItem', item_id = i.id)}}" role="button">Delete</a>
+							</div>
+							{% endif %}
+							<a href="{{i.item_link}}">
+								<img class="card-img-top" src="{{i.item_image}}" alt="{{i.item_image}}">
+							</a>
+							<div class="card-body">
+								<h5 class="card-title">{{i.item_name}}</h5>
+								<p class="card-text">{{i.item_description}}</p>
+							</div>
+						</div>
+					</div>
+				{% endif %}
+				{% endfor %}
+				</div>
+			</div>
+			{% endfor %}
 		</div>
+			
+
 	<footer class="border-top mt-5">
 		<p class="lead small text-center mt-3">Very cool footer</p>
 	</footer>
